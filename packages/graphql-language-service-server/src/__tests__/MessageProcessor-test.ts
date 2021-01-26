@@ -369,6 +369,35 @@ query Test {
 `);
   });
 
+  it('parseDocument finds queries in templates following /* GraphQL */ using typescript', async () => {
+    const text = `
+import {gql} from 'react-apollo';
+import {B} from 'B';
+import A from './A';
+
+const QUERY: string = /* GraphQL */ \`
+query Test {
+  test {
+    value
+    ...FragmentsComment
+  }
+}
+\${A.fragments.test}
+\`
+
+export function Example(arg: string) {}`;
+
+    const contents = parseDocument(text, 'test.ts');
+    expect(contents[0].query).toEqual(`
+query Test {
+  test {
+    value
+    ...FragmentsComment
+  }
+}
+`);
+  });
+
   it('parseDocument finds queries in tagged templates using tsx', async () => {
     const text = `
 import {gql} from 'react-apollo';

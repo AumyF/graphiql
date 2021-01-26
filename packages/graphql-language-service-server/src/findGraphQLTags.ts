@@ -150,6 +150,18 @@ export function findGraphQLTags(text: string, ext: string): TagResult[] {
         }
       }
     },
+    TemplateLiteral: (node: TemplateLiteral) => {
+      const comments = node.leadingComments;
+      if (!comments?.some(({ value }) => value === ' GraphQL ') || !node.loc) {
+        return;
+      }
+      const { start, end } = node.loc;
+      const range = new Range(
+        new Position(start.line - 1, start.column),
+        new Position(end.line - 1, end.column),
+      );
+      result.push({ tag: '', template: node.quasis[0].value.raw, range });
+    },
     TaggedTemplateExpression: (node: TaggedTemplateExpression) => {
       const tagName = getGraphQLTagName(node.tag);
       if (tagName) {
